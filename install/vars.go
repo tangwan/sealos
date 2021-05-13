@@ -1,11 +1,14 @@
 package install
 
 import (
-	"github.com/fanux/lvscare/care"
-	"github.com/fanux/sealos/ipvs"
-	"github.com/fanux/sealos/pkg/sshcmd/sshutil"
 	"regexp"
 	"strconv"
+
+	"github.com/fanux/lvscare/care"
+
+	"github.com/fanux/sealos/cert"
+	"github.com/fanux/sealos/ipvs"
+	"github.com/fanux/sealos/pkg/sshcmd/sshutil"
 )
 
 var (
@@ -19,8 +22,14 @@ var (
 	SSHConfig sshutil.SSH
 	ApiServer string
 	//cert abs path
-	CertPath     = "/root/.sealos/pki"
-	CertEtcdPath = "/root/.sealos/pki/etcd"
+	CertPath     = cert.SealosConfigDir + "/pki"
+	CertEtcdPath = cert.SealosConfigDir + "/pki/etcd"
+	EtcdCacart   = cert.SealosConfigDir + "/pki/etcd/ca.crt"
+	EtcdCert     = cert.SealosConfigDir + "/pki/etcd/healthcheck-client.crt"
+	EtcdKey      = cert.SealosConfigDir + "/pki/etcd/healthcheck-client.key"
+
+	//criSocket
+	CriSocket string
 
 	VIP     string
 	PkgUrl  string
@@ -29,12 +38,10 @@ var (
 	PodCIDR string
 	SvcCIDR string
 
-	// workdir for install package home
-	Workdir string
-	// values for  install package values.yaml
-	Values string
-	// packageConfig for install package config
-	PackageConfig string
+	Envs          []string // read env from -e
+	PackageConfig string   // install/delete package config
+	Values        string   // values for  install package values.yaml
+	WorkDir       string   // workdir for install/delete package home
 
 	//
 	Ipvs         care.LvsCare
@@ -57,6 +64,19 @@ var (
 	CleanAll   bool
 
 	Vlog int
+
+	// etcd backup
+	InDocker     bool
+	SnapshotName string
+	EtcdBackDir  string
+	RestorePath  string
+
+	// oss
+	OssEndpoint      string
+	AccessKeyId      string
+	AccessKeySecrets string
+	BucketName       string
+	ObjectPath       string
 )
 
 func vlogToStr() string {
